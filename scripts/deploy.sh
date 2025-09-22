@@ -18,7 +18,7 @@ echo "✅ Connected to cluster: $(kubectl config current-context)"
 echo "📦 Creating namespaces..."
 kubectl apply -f kubernetes/namespaces/
 
-# Deploy sample application
+# Deploy sample application (no persistent storage required)
 echo "🔧 Deploying sample applications..."
 kubectl apply -f kubernetes/manifests/
 
