@@ -1,0 +1,73 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: et-demo-cluster
+  region: us-east-1
+  tags:
+    owner: et
+    project: cloudprem
+    environment: demo
+
+# Use existing VPC
+vpc:
+  id: vpc-041f06960858d6a92
+  subnets:
+    public:
+      us-east-1f: { id: subnet-0c4d48afd2e1753ab }
+      us-east-1d: { id: subnet-0c1aba93993b37a4d }
+
+# Cluster configuration
+kubernetesNetworkConfig:
+  serviceIPv4CIDR: "10.100.0.0/16"
+
+# IAM settings
+iam:
+  withOIDC: true
+
+# Node groups
+nodeGroups:
+  - name: et-demo-nodes
+    instanceType: t3.medium  # 2 vCPUs, 4GB RAM - cheapest option
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 4
+    volumeSize: 20
+    volumeType: gp3
+    amiFamily: AmazonLinux2
+    
+    # Use public subnets for internet access
+    subnets:
+      - subnet-0c4d48afd2e1753ab  # us-east-1f public
+      - subnet-0c1aba93993b37a4d  # us-east-1d public
+    
+    # Security and access
+    ssh:
+      allow: false  # Disable SSH for security
+    
+    # Tags
+    tags:
+      owner: et
+      project: cloudprem
+      environment: demo
+      node-group: et-demo-nodes
+    
+    # Instance metadata options (configured via launch template)
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+# Cluster endpoint access - public by default
+
+# Add-ons
+addons:
+  - name: vpc-cni
+    version: latest
+  - name: coredns
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    version: latest
