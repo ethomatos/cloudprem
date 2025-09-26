@@ -1,0 +1,53 @@
+# PostgreSQL client pod for testing database connectivity
+# This pod will be able to connect to the RDS instance once it's ready
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-client
+  namespace: demo
+  labels:
+    app: postgres-client
+    owner: et
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-client
+  template:
+    metadata:
+      labels:
+        app: postgres-client
+    spec:
+      containers:
+      - name: postgres-client
+        image: postgres:16-alpine
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do sleep 30; done;"]
+        env:
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: host
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: database
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
