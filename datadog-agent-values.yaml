@@ -1,0 +1,36 @@
+# Datadog Agent Helm Values for CloudPrem Log Ingestion
+datadog:
+  apiKey: "YOUR_DATADOG_API_KEY_HERE"  # Replace with actual API key
+  clusterName: et-demo-cluster
+  site: datadoghq.com
+  
+  # Enable log collection
+  logs:
+    enabled: true
+    containerCollectAll: true
+
+  # Enable cluster monitoring features
+  prometheusScrape:
+    enabled: true
+    serviceEndpoints: true
+
+# Agent container configuration
+agents:
+  containers:
+    agent:
+      env:
+        # CloudPrem indexer endpoint configuration
+        - name: DD_LOGS_CONFIG_LOGS_DD_URL
+          value: "http://cloudprem-indexer.cloudprem.svc.cluster.local:7280"
+        # Ensure host-level tags are added to logs
+        - name: DD_LOGS_CONFIG_EXPECTED_TAGS_DURATION
+          value: "100000"
+        # Additional CloudPrem-specific configurations
+        - name: DD_LOGS_ENABLED
+          value: "true"
+        - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+          value: "true"
+
+# Cluster Agent configuration (optional)
+clusterAgent:
+  enabled: true

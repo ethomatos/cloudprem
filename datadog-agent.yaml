@@ -1,0 +1,39 @@
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+  namespace: default
+spec:
+  global:
+    clusterName: et-demo-cluster
+    site: datadoghq.com
+    credentials:
+      apiSecret:
+        secretName: datadog-secret
+        keyName: api-key
+    env:
+      # CloudPrem indexer endpoint - internal cluster service
+      - name: DD_LOGS_CONFIG_LOGS_DD_URL
+        value: http://cloudprem-indexer.cloudprem.svc.cluster.local:7280
+      # Ensure host-level tags are added to logs (recommended for CloudPrem)
+      - name: DD_LOGS_CONFIG_EXPECTED_TAGS_DURATION
+        value: "100000"
+
+  features:
+    # Enable log collection for CloudPrem
+    logCollection:
+      enabled: true
+      containerCollectAll: true
+
+    # Enable OTLP receiver for additional telemetry
+    otlp:
+      receiver:
+        protocols:
+          grpc:
+            enabled: true
+            endpoint: 0.0.0.0:4417
+
+    # Enable Prometheus scraping for cluster metrics
+    prometheusScrape:
+      enabled: true
+      enableServiceEndpoints: true
