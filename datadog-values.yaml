@@ -1,0 +1,127 @@
+# CloudPrem Helm Chart Values for EKS Deployment
+# This configuration is customized for the et-demo-cluster environment
+
+aws:
+  accountId: "601427279990"
+
+# Environment variables
+# Any environment variables defined here are available to all pods in the deployment
+environment:
+  AWS_REGION: us-east-1
+
+# Service account configuration
+# If `serviceAccount.create` is set to `true`, a service account is created with the specified name.
+# The service account will be annotated with the IAM role ARN if `aws.accountId` and serviceAccount.eksRoleName` are set.
+serviceAccount:
+  create: true
+  name: cloudprem
+  # Note: IAM role will need to be created separately for S3 access
+  # eksRoleName: cloudprem
+  extraAnnotations: {}
+
+# CloudPrem node configuration
+config:
+  # The root URI where index data is stored. This should be an S3 path.
+  # All indexes created in CloudPrem are stored under this location.
+  default_index_root_uri: s3://cloudprem-indexes-1758913997/indexes
+
+# Ingress configuration
+# The chart supports two ingress configurations:
+# 1. A public ingress for external access through the internet that will be used exclusively by Datadog's control plane and query service.
+# 2. An internal ingress for access within the VPC
+#
+# Both ingresses provision an Application Load Balancers (ALBs) in AWS.
+# The public ingress ALB is created in public subnets.
+# The internal ingress ALB is created in private subnets.
+ingress:
+  # The public ingress is configured to only accept TLS traffic and requires mutual TLS (mTLS) authentication.
+  # Datadog's control plane and query service authenticate themselves using client certificates,
+  # ensuring that only authorized Datadog services can access CloudPrem nodes through the public ingress.
+  public:
+    enabled: true
+    name: cloudprem-public
+    host: cloudprem-public.et-demo.internal
+    extraAnnotations:
+      alb.ingress.kubernetes.io/load-balancer-name: cloudprem-public
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+  
+  # The internal ingress is used by Datadog Agents and other collectors running outside
+  # the Kubernetes cluster to send their logs to CloudPrem.
+  internal:
+    enabled: true
+    name: cloudprem-internal
+    host: cloudprem-internal.et-demo.internal
+    extraAnnotations:
+      alb.ingress.kubernetes.io/load-balancer-name: cloudprem-internal
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/target-type: ip
+
+# Metastore configuration
+# The metastore is responsible for storing and managing index metadata.
+# It requires a PostgreSQL database connection string to be provided by a Kubernetes secret.
+metastore:
+  extraEnvFrom:
+    - secretRef:
+        name: cloudprem-metastore-uri
+
+# Indexer configuration
+# The indexer is responsible for processing and indexing incoming data
+# Resource allocation optimized for t3.medium nodes (minimal resources for testing)
+indexer:
+  replicaCount: 1  # Start with 1 for testing, can scale up
+  resources:
+    requests:
+      cpu: "500m"   # Minimal for t3.medium nodes
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+# Searcher configuration  
+# The searcher is responsible for executing search queries against the indexed data stored in S3.
+searcher:
+  replicaCount: 1  # Start with 1 for testing, can scale up
+  resources:
+    requests:
+      cpu: "500m"   # Minimal for t3.medium nodes  
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+# Metastore pods configuration
+metastore:
+  replicaCount: 1  # Start with 1 for testing
+  extraEnvFrom:
+    - secretRef:
+        name: cloudprem-metastore-uri
+  resources:
+    requests:
+      cpu: "250m"   # Minimal for t3.medium nodes
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+# Control plane configuration
+control_plane:
+  resources:
+    requests:
+      cpu: "250m"   # Minimal for t3.medium nodes
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+# Janitor configuration (cleanup service)
+janitor:
+  resources:
+    requests:
+      cpu: "100m"   # Minimal for t3.medium nodes
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
