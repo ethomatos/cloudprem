@@ -61,11 +61,13 @@ nodeGroups:
 
 # Cluster endpoint access - public by default
 
-# Add-ons (core only - EBS CSI driver excluded due to CloudFormation stack limits)
+# Add-ons
 addons:
   - name: vpc-cni
     version: latest
   - name: coredns
     version: latest
   - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
     version: latest

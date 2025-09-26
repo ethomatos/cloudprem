@@ -79,7 +79,7 @@ cloudprem/
 - [x] Sample nginx deployment with service
 - [x] Deployment and cleanup automation scripts
 - [ ] Application Load Balancer integration
-- [ ] EBS CSI driver (excluded due to CloudFormation limits - can be added manually if needed)
+- [ ] EBS CSI driver (optional)
 - [ ] Monitoring and logging setup
 - [ ] GitOps integration
 
@@ -90,13 +90,6 @@ cloudprem/
 - **View cluster info**: `kubectl cluster-info`
 - **View nodes**: `kubectl get nodes`
 - **View all resources**: `kubectl get all --all-namespaces`
-
-## Known Limitations
-
-- **EBS CSI Driver**: Not installed due to CloudFormation stack limits in the dd_sandbox account
-  - **Impact**: Cannot create persistent volumes using EBS
-  - **Workaround**: Use emptyDir volumes or install EBS CSI driver manually after cleanup
-  - **Alternative**: Use other storage classes or external storage solutions
 
 ## Contributing
 
