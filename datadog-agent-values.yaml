@@ -4,6 +4,14 @@ datadog:
   clusterName: et-demo-cluster
   site: datadoghq.com
   
+  # Custom tags for all metrics and logs
+  tags:
+    - "owner:et"
+    - "ddmonitor:true"
+    - "availability:true"
+    - "performance:true"
+    - "env:dev"
+  
   # Enable log collection
   logs:
     enabled: true
@@ -30,6 +38,9 @@ agents:
           value: "true"
         - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
           value: "true"
+        # Custom tags configuration  
+        - name: DD_TAGS
+          value: "owner:et ddmonitor:true availability:true performance:true env:dev"
 
 # Cluster Agent configuration (optional)
 clusterAgent:

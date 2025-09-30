@@ -11,6 +11,13 @@ spec:
       apiSecret:
         secretName: datadog-secret
         keyName: api-key
+    # Custom tags for all metrics and logs
+    tags:
+      - "owner:et"
+      - "ddmonitor:true"
+      - "availability:true"
+      - "performance:true"
+      - "env:dev"
     env:
       # CloudPrem indexer endpoint - internal cluster service
       - name: DD_LOGS_CONFIG_LOGS_DD_URL
@@ -18,6 +25,9 @@ spec:
       # Ensure host-level tags are added to logs (recommended for CloudPrem)
       - name: DD_LOGS_CONFIG_EXPECTED_TAGS_DURATION
         value: "100000"
+      # Custom tags configuration
+      - name: DD_TAGS
+        value: "owner:et,ddmonitor:true,availability:true,performance:true,env:dev"
 
   features:
     # Enable log collection for CloudPrem

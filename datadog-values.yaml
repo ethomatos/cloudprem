@@ -45,8 +45,10 @@ ingress:
       alb.ingress.kubernetes.io/load-balancer-name: cloudprem-public
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/healthcheck-path: /health/readyz
+      alb.ingress.kubernetes.io/success-codes: "200"
   
   # The internal ingress is used by Datadog Agents and other collectors running outside
   # the Kubernetes cluster to send their logs to CloudPrem.
@@ -58,6 +60,10 @@ ingress:
       alb.ingress.kubernetes.io/load-balancer-name: cloudprem-internal
       alb.ingress.kubernetes.io/scheme: internal
       alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/healthcheck-path: /health/readyz
+      alb.ingress.kubernetes.io/success-codes: "200"
 
 # Metastore configuration
 # The metastore is responsible for storing and managing index metadata.
